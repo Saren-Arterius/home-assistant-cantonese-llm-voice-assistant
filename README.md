@@ -63,3 +63,9 @@ See it in action: https://www.youtube.com/watch?v=AsE5OYmnYws
     - Say "冇你既事/你可以走啦" or anything dismissive to close the UI.
     - Ask questions about your home, bus ETAs, weather, etc. You can also tell the LLM to create automation or other tasks.
     - It is likely you can interrupt it when TTS is speaking by saying "**Hey Siri**."
+
+# Licenses
+- ha-llm: GPLv3
+- jarvis (main-ha.js and voice-loader.js): GPLv3
+- System Prompts and Function list: CC0
+- Other components has their own licenses.

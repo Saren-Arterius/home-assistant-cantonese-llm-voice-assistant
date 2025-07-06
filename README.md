@@ -68,4 +68,4 @@ See it in action: https://www.youtube.com/watch?v=AsE5OYmnYws
 - llm-api: GPLv3
 - jarvis (main-ha.js and voice-loader.js): GPLv3
 - System Prompts and Function list: CC0
-- Other components has their own licenses.
+- Other components has their own corresponding authors and licenses.

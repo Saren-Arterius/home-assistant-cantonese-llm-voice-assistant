@@ -1,0 +1,222 @@
+[
+    {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "title": "Home Assistant Automation",
+        "description": "Schema for a single automation configuration.",
+        "type": "object",
+        "properties": {
+            "alias": {
+                "type": "string",
+                "description": "A unique, friendly name for the automation."
+            },
+            "description": {
+                "type": "string",
+                "description": "A longer description of what the automation does."
+            },
+            "mode": {
+                "type": "string",
+                "description": "Controls what happens when the automation is triggered while it's already running.",
+                "enum": [
+                    "single",
+                    "restart",
+                    "queued",
+                    "parallel"
+                ],
+                "default": "single"
+            },
+            "trigger": {
+                "type": "array",
+                "description": "A list of triggers that will start the automation.",
+                "items": {
+                    "type": "object",
+                    "properties": {
+                        "platform": {
+                            "type": "string",
+                            "description": "The type of trigger."
+                        }
+                    },
+                    "required": [
+                        "platform"
+                    ],
+                    "oneOf": [
+                        {
+                            "properties": {
+                                "platform": {
+                                    "const": "time"
+                                },
+                                "at": {
+                                    "type": "string",
+                                    "description": "The specific time to trigger, e.g., '08:30:00'."
+                                }
+                            },
+                            "required": [
+                                "at"
+                            ]
+                        },
+                        {
+                            "properties": {
+                                "platform": {
+                                    "const": "time_pattern"
+                                },
+                                "minutes": {
+                                    "type": "string",
+                                    "pattern": "^(/\\d+|\\d+)$"
+                                },
+                                "hours": {
+                                    "type": "string",
+                                    "pattern": "^(/\\d+|\\d+)$"
+                                },
+                                "seconds": {
+                                    "type": "string",
+                                    "pattern": "^(/\\d+|\\d+)$"
+                                }
+                            }
+                        },
+                        {
+                            "properties": {
+                                "platform": {
+                                    "const": "state"
+                                },
+                                "entity_id": {
+                                    "type": "string"
+                                },
+                                "to": {
+                                    "type": [
+                                        "string",
+                                        "number",
+                                        "boolean",
+                                        "null"
+                                    ]
+                                },
+                                "from": {
+                                    "type": [
+                                        "string",
+                                        "number",
+                                        "boolean",
+                                        "null"
+                                    ]
+                                },
+                                "for": {
+                                    "type": [
+                                        "string",
+                                        "number",
+                                        "object"
+                                    ],
+                                    "description": "The duration the state must be held before triggering."
+                                }
+                            },
+                            "required": [
+                                "entity_id"
+                            ]
+                        },
+                        {
+                            "properties": {
+                                "platform": {
+                                    "const": "sun"
+                                },
+                                "event": {
+                                    "enum": [
+                                        "sunrise",
+                                        "sunset"
+                                    ]
+                                },
+                                "offset": {
+                                    "type": "string",
+                                    "description": "Offset from the event, e.g., '-01:00:00'."
+                                }
+                            },
+                            "required": [
+                                "event"
+                            ]
+                        },
+                        {
+                            "properties": {
+                                "platform": {
+                                    "const": "numeric_state"
+                                },
+                                "entity_id": {
+                                    "type": "string"
+                                },
+                                "above": {
+                                    "type": "number"
+                                },
+                                "below": {
+                                    "type": "number"
+                                }
+                            },
+                            "required": [
+                                "entity_id"
+                            ]
+                        },
+                        {
+                            "description": "Other platforms like 'zone', 'event', 'webhook' would be added here."
+                        }
+                    ]
+                }
+            },
+            "condition": {
+                "type": "array",
+                "description": "A list of conditions that must be true for the actions to run.",
+                "items": {
+                    "type": "object",
+                    "properties": {
+                        "condition": {
+                            "type": "string"
+                        }
+                    },
+                    "required": [
+                        "condition"
+                    ]
+                }
+            },
+            "action": {
+                "type": "array",
+                "description": "The sequence of actions to perform.",
+                "items": {
+                    "type": "object",
+                    "oneOf": [
+                        {
+                            "properties": {
+                                "service": {
+                                    "type": "string"
+                                }
+                            },
+                            "required": [
+                                "service"
+                            ]
+                        },
+                        {
+                            "properties": {
+                                "delay": {
+                                    "type": [
+                                        "string",
+                                        "number",
+                                        "object"
+                                    ]
+                                }
+                            },
+                            "required": [
+                                "delay"
+                            ]
+                        },
+                        {
+                            "properties": {
+                                "device_id": {
+                                    "type": "string"
+                                }
+                            },
+                            "required": [
+                                "device_id"
+                            ]
+                        }
+                    ]
+                }
+            }
+        },
+        "required": [
+            "alias",
+            "trigger",
+            "action"
+        ]
+    }
+]

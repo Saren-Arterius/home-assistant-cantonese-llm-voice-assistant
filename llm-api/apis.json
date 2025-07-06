@@ -1,0 +1,72 @@
+{
+  "endpoints": [
+    {
+      "name": "System Monitor (Current Stats)",
+      "url": "http://127.0.0.1:3000/current",
+      "description": "Current system performance metrics, suitable for comprehensive monitoring and Home Assistant integration. You should analyze the data and give brief overview or summary about the system status. Output format: JSON.",
+      "capabilities": [
+        "CPU usage",
+        "RAM usage",
+        "Storage statistics (temperature, wear, read/write)",
+        "Network I/O",
+        "Fan speeds",
+        "Internet connectivity (latency, packet loss, IP history)"
+      ]
+    },
+    {
+      "name": "Home Area Bus ETAs (Outbound)",
+      "url": "http://[YOUR_HOST]/kmb/bus-etas/home/outbound",
+      "description": "This is the default tool for bus ETAs, for journeys **from the user's home area to other locations**. Assume the user is at home unless they explicitly state they are at work or ask for a return journey. Key locations: **Home Area Stops** include '錦泰苑' (closer stop), '富安花園' (further stop, faster bus), '富安花園總站' (most far, rare). **Workplace Stop** is '尖沙咀轉車站 - 海防道'. When departing from home, the tool resolves a user choice: walking less vs. a faster bus journey. **CRITICAL: Your decision-making process MUST follow these rules in order:** 1. **#1 Priority - Detect 'Less Walking' Preference:** Your first task is to check for keywords like '唔想行', '行少啲', '不想走', 'closer', etc. If present, you **MUST** provide the route from the closer stop, **'錦泰苑'**, and present it as the primary solution. 2. **Default/Fallback - Fastest Route:** If, and ONLY IF, the user does NOT express a preference for less walking (or explicitly asks for 'fastest'/'quickest'), you should then recommend the faster bus service, denoted by minimum number of `distance_to_target`. The only exception is 85K for 沙田總站, because 86K takes more combined time. 3. **Prohibition - No Confirmation Questions:** NEVER ask for confirmation. Trust the user's initial statement and provide the correct route immediately. **CRITICAL Response Formatting: Your response must follow these presentation rules:** 1. **State the Departure Stop:** Your initial response **MUST** explicitly state the name of the departure bus stop. Example: 'You can take bus [Number] **at 錦泰苑**' or '**喺富安花園搭** [Number] 巴士...'. This is a non-negotiable part of the answer. 2. **Use Correct Phrasing for Stop Count:** When a user asks for the number of stops, describe the total length of the journey. **DO NOT** use phrasing that implies the user is already on the bus. **Correct Phrasing:** 'The journey has X stops', '總共有X個站', or '**坐X個站**'. **Forbidden Phrasing:** 'There are X stops **left**', or '**仲有X個站就到**'. 4. At least provide 2 ETAs for the bus route.",
+      "params": [
+        {
+          "name": "bus_stop",
+          "type": "string",
+          "optional": true,
+          "description": "Optional: A specific destination or bus stop name. When provided, the endpoint can calculate intermediate stops count between home area bus stops and user destination."
+        }
+      ],
+      "capabilities": [
+        "Provide ETAs and route details from multiple home area bus stops.",
+        "When bus_stop is supplied, it calculates the numbers of intermediate stops, allowing prioritizing faster journeys.",
+        "Identify direct routes to a destination and show the number of intermediate stops for comparison.",
+        "Optionally show all bus routes, including those with no ETA."
+      ]
+    },
+    {
+      "name": "Work Area Bus ETAs (Return Home)",
+      "url": "http://[YOUR_HOST]/kmb/bus-etas/work/both",
+      "description": "Provides real-time bus ETAs for the journey from the user's work area back **to their home area**. Assumes user is at work, returning home. Primary work departure stops are **'尖沙咀轉車站 - 海防道', 'KOWLOON PARK DRIVE', and 'HANKOW ROAD BUS TERMINUS'**. Use *only* when user explicitly mentions being at work or asking for buses from Tsim Sha Tsui area to home. **Response Format (CRITICAL):** 1. **State Departure Stop explicitly.** 2. **For stop counts, use 'The journey has X stops' or '總共有X個站'.** 3. **Provide at least 2 ETAs.**",
+      "params": [
+        {
+          "name": "bus_stop",
+          "type": "string",
+          "optional": true,
+          "description": "Optional: A specific destination near home. When provided, the endpoint can calculate intermediate stops count."
+        }
+      ],
+      "capabilities": [
+        "Provide ETAs for outbound routes from the work area.",
+        "Calculate the number of intermediate stops to a destination."
+      ]
+    },
+    {
+      "name": "Hong Kong Weather Data",
+      "url": "http://[YOUR_HOST]/weather/hk",
+      "description": "Fetches current weather warnings, local weather forecasts, and several-day weather forecasts from the Hong Kong Observatory RSS feeds. The data is cleaned and aggregated into a single JSON response.",
+      "capabilities": [
+        "Provides current weather warnings.",
+        "Provides local weather forecast information.",
+        "Provides a multi-day weather forecast."
+      ]
+    },
+    {
+      "name": "Hong Kong Latest Radar Analysis (Rainfall)",
+      "url": "http://[YOUR_HOST]/weather/hk/radar",
+      "description": "Analyzes the latest rainfall radar image from the Hong Kong Observatory to provide a textual description of current weather conditions. This uses advanced AI processing and it's time-consuming operation. User confirmation is MUST and CRITICAL before using this tool, except when user already mentioned no confirm needed.",
+      "capabilities": [
+        "Provides a textual analysis of the latest rainfall radar image.",
+        "Requires user confirmation due to 15 seconds processing time."
+      ]
+    }
+  ]
+}

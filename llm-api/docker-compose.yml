@@ -1,0 +1,22 @@
+version: '3.8'
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    working_dir: /app
+    volumes:
+      - ./:/app
+    ports:
+      - "127.0.0.1:28080:3000"
+    environment:
+      - OPENROUTER_API_KEY=YOUR_API_KEY_HERE # For visual analysis of HKO radar image
+      - TELEGRAM_BOT_TOKEN=YOUR_BOT_TOKEN_HERE_FIND_BOTFATHER # For sending HKO radar image and analysis result into your TG group
+      - TELEGRAM_GROUP_ID=CREATE_A_NEW_GROUP_AND_ADD_ROSE_TO_FIND_ID
+    restart: always
+  redis:
+    image: redis:7-alpine
+    volumes:
+      - ./redis:/data
+    command: redis-server --appendonly yes --appendfsync everysec --loglevel warning
+    restart: always

@@ -1,0 +1,152 @@
+services:
+  whisper-cpp-short:
+    # < 5 seconds
+    build:
+      context: ./whisper-cpp
+      args:
+        - WHISPER_CPP_VERSION=1.7.5
+        - BUILD_FROM=intel/oneapi:2025.1.3-0-devel-ubuntu24.04
+    restart: always
+    depends_on:
+      model-download:
+        condition: service_completed_successfully
+    # Change user to the one that will run the container
+    user: 1000:1000
+    group_add:
+      # Change this number to match your "render" host group id
+      # You can get the id number by running: getent group render
+      - "91"
+    security_opt:
+      - no-new-privileges:true
+    volumes:
+      - type: bind
+        source: ./models
+        target: /models
+    hostname: whisper-cpp-short
+    devices:
+      - /dev/dri:/dev/dri
+    environment:
+      - SYCL_CACHE_PERSISTENT=1
+      - SYCL_CACHE_DIR=/models/sycl_cache
+      - SYCL_DEVICE_ALLOWLIST=BackendName:level_zero
+      - GGML_SYCL_DISABLE_OPT=0
+      - GGML_SYCL_DISABLE_GRAPH=0
+    # command: build/bin/whisper-server -l ${WHISPER_LANG} -bs ${WHISPER_BEAM_SIZE} -m /models/ggml-${WHISPER_MODEL}.bin --host 0.0.0.0 --port 8910 --prompt "${WHISPER_PROMPT}"
+    command: build/bin/whisper-server -l ${WHISPER_LANG} -bs ${WHISPER_BEAM_SIZE} -t 6 -m /models/ggml-${WHISPER_MODEL}.bin --host 0.0.0.0 --port 8910 --prompt "${WHISPER_PROMPT}" -pp -sns -ac 320 -mc 0
+    ports:
+      - 100.64.0.1:8910:8910
+  whisper-cpp-long:
+    # <9 seconds
+    build:
+      context: ./whisper-cpp
+      args:
+        - WHISPER_CPP_VERSION=1.7.5
+        - BUILD_FROM=intel/oneapi:2025.1.3-0-devel-ubuntu24.04
+    restart: always
+    depends_on:
+      model-download:
+        condition: service_completed_successfully
+    # Change user to the one that will run the container
+    user: 1000:1000
+    group_add:
+      # Change this number to match your "render" host group id
+      # You can get the id number by running: getent group render
+      - "91"
+    security_opt:
+      - no-new-privileges:true
+    volumes:
+      - type: bind
+        source: ./models
+        target: /models
+    hostname: whisper-cpp-long
+    devices:
+      - /dev/dri:/dev/dri
+    environment:
+      - SYCL_CACHE_PERSISTENT=1
+      - SYCL_CACHE_DIR=/models/sycl_cache
+      - SYCL_DEVICE_ALLOWLIST=BackendName:level_zero
+      - GGML_SYCL_DISABLE_OPT=0
+      - GGML_SYCL_DISABLE_GRAPH=0
+    # command: build/bin/whisper-server -l ${WHISPER_LANG} -bs ${WHISPER_BEAM_SIZE} -m /models/ggml-${WHISPER_MODEL}.bin --host 0.0.0.0 --port 8910 --prompt "${WHISPER_PROMPT}"
+    command: build/bin/whisper-server -l ${WHISPER_LANG} -bs ${WHISPER_BEAM_SIZE} -t 6 -m /models/ggml-${WHISPER_MODEL}.bin --host 0.0.0.0 --port 8910 --prompt "${WHISPER_PROMPT}" -pp -sns -ac 512 -mc 0
+    ports:
+      - 100.64.0.1:8911:8910
+  whisper-cpp-inf:
+    build:
+      context: ./whisper-cpp
+      args:
+        - WHISPER_CPP_VERSION=1.7.5
+        - BUILD_FROM=intel/oneapi:2025.1.3-0-devel-ubuntu24.04
+    restart: always
+    depends_on:
+      model-download:
+        condition: service_completed_successfully
+    # Change user to the one that will run the container
+    user: 1000:1000
+    group_add:
+      # Change this number to match your "render" host group id
+      # You can get the id number by running: getent group render
+      - "91"
+    security_opt:
+      - no-new-privileges:true
+    volumes:
+      - type: bind
+        source: ./models
+        target: /models
+    hostname: whisper-cpp-inf
+    devices:
+      - /dev/dri:/dev/dri
+    environment:
+      - SYCL_CACHE_PERSISTENT=1
+      - SYCL_CACHE_DIR=/models/sycl_cache
+      - SYCL_DEVICE_ALLOWLIST=BackendName:level_zero
+      - GGML_SYCL_DISABLE_OPT=0
+      - GGML_SYCL_DISABLE_GRAPH=0
+    # command: build/bin/whisper-server -l ${WHISPER_LANG} -bs ${WHISPER_BEAM_SIZE} -m /models/ggml-${WHISPER_MODEL}.bin --host 0.0.0.0 --port 8910 --prompt "${WHISPER_PROMPT}"
+    command: build/bin/whisper-server -l ${WHISPER_LANG} -bs ${WHISPER_BEAM_SIZE} -t 6 -m /models/ggml-${WHISPER_MODEL}.bin --host 0.0.0.0 --port 8910 --prompt "${WHISPER_PROMPT}" -pp -sns -mc 0
+    ports:
+      - 100.64.0.1:8912:8910
+  wyoming-api:
+    build:
+      context: ./wyoming-api
+      args:
+        - BUILD_FROM=debian:bookworm-slim
+    restart: always
+    depends_on:
+      - haproxy
+    security_opt:
+      - no-new-privileges:true
+    # Change user to the one that will run the container
+    user: 1000:1000
+    ports:
+      - 127.0.0.1:7891:7891
+    command: script/run --uri tcp://0.0.0.0:7891 --api http://haproxy:8910/inference
+  model-download:
+    security_opt:
+      - no-new-privileges:true
+    user: 1000:1000
+    build:
+      context: ./model-download
+    volumes:
+      - type: bind
+        source: ./models
+        target: /models
+    restart: no
+    environment:
+      - MODEL=${WHISPER_MODEL}
+  haproxy:
+    image: haproxy:alpine # Using a stable HAProxy Alpine image
+    volumes:
+      # Mount the HAProxy configuration file
+      - ./haproxy/haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg:ro
+    depends_on:
+      # Ensure whisper-cpp is up before starting haproxy, primarily for DNS resolution
+      whisper-cpp-short:
+        condition: service_healthy
+      whisper-cpp-long:
+        condition: service_healthy
+      whisper-cpp-inf:
+        condition: service_healthy
+    restart: always
+    ports:
+      - 100.64.0.1:8930:8910

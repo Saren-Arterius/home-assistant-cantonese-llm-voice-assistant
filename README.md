@@ -1,6 +1,7 @@
 # Saren's Cantonese LLM Voice Assistant config for Home Assistant v0.0.2-4
 Transform your Cantonese-speaking Hong Kong home to use LLMs in Home Assistant without language barriers.
-https://www.youtube.com/watch?v=AsE5OYmnYws
+
+See it in action: https://www.youtube.com/watch?v=AsE5OYmnYws
 
 # What to Expect
 - Natural Cantonese Conversation with AI with fairly good UX. Capable of controlling most of your IoT devices without scripting.
